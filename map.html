@@ -87,6 +87,7 @@
                 });
                 document.getElementById("toggle-"+route).innerText = "Show Route " + route;
                 routes_vis[route] = false;
+                return true;
             }
             else
             {
@@ -94,12 +95,18 @@
                 var o = new Object();
                 o.color = pin_color[route];
                 o.scale = 0.25;
+
+                if(Object.keys(stop_list).length === 0)
+                    return false;
+
                 stop_list[route].forEach(element => {
                     temp_list.push(new mapboxgl.Marker(o).setLngLat([element.long, element.lat]).addTo(map));
                 });
                 stop_markers[route] = temp_list;
                 document.getElementById("toggle-"+route).innerText = "Hide Route " + route;
                 routes_vis[route] = true;
+
+                return true;
             }
         }
 
@@ -122,12 +129,17 @@
                 });
                 document.getElementById("veh-"+route).innerText = "Show Buses #" + route;
                 vehicles_vis[route] = false;
+                return true;
             }
             else
             {
                 temp_list = [];
                 var o = new Object();
                 o.color = pin_color[route];
+
+                if(Object.keys(veh_list).length === 0)
+                    return false;
+
                 veh_list[route].forEach(element => {
                     temp_list.push(new mapboxgl.Marker(o).setLngLat([element.long, element.lat]).addTo(map));
                 });
@@ -137,6 +149,7 @@
                 else
                     document.getElementById("veh-"+route).innerText = "Hide Buses #" + route;
                 vehicles_vis[route] = true;
+                return true;
             }
         }
 
@@ -161,9 +174,6 @@
                 center: [-71.0936358, 42.3593903],
                 zoom: 15
             });
-            
-
-
 
             // Add Building 7 marker
             var o = new Object();
@@ -176,6 +186,14 @@
             init_vehicles(routes[1]);
             init_vehicles(routes[68]);
 
+            toggle_stops(1);
+            toggle_vehicles(1);
+
+            map_build = setInterval(function(){
+                if(toggle_vehicles(1) && toggle_stops(1))
+                    clearInterval(map_build);
+            },1000);
+
             setInterval(() => {
                 update_positions();
             }, 5000);
@@ -187,7 +205,7 @@
         w = setInterval(function(){
             if(tk != null)
             {
-                clearTimeout(w);
+                clearInterval(w);
                 load_map();
             }
         },1000);
